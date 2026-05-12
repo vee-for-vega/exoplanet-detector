@@ -1,0 +1,47 @@
+# local data 
+data/raw/
+data/processed/
+data/images/
+
+# keep split definitions (small, reproducibility-critical)
+!data/splits/
+
+# model checkpoints (top-level only, not src/models/)
+/models/
+
+/results/
+
+# python
+__pycache__/
+*.pyc
+*.egg-info/
+.eggs/
+dist/
+build/
+
+# Environments
+.env
+.venv/
+venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Jupyter
+.ipynb_checkpoints/
+
+# Terraform
+.terraform/
+*.tfstate
+*.tfstate.backup
+*.tfvars
+
+# Docker
+.dockerignore
