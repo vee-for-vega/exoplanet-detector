@@ -31,12 +31,27 @@ for _d in [RAW_DIR, PROCESSED_DIR, SPLITS_DIR, MODELS_DIR, RESULTS_DIR]:
 # NASA Exoplanet Archive TAP API
 NASA_API_URL = "https://exoplanetarchive.ipac.caltech.edu/TAP/sync"
 
+# S3 data bucket (created by terraform/; see src/data/s3_sync.py).
+# export EXOPLANET_S3_BUCKET=$(cd terraform && terraform output -raw bucket_name)
+S3_BUCKET = os.environ.get("EXOPLANET_S3_BUCKET")
+
 # Labels: how NASA dispositions map to binary classes
 # CP/KP = planet (1), FP/FA = not planet (0), PC = excluded (-1)
 DISPOSITION_MAP = {
     "CP": 1,  "KP": 1,   # Confirmed / Known Planet
     "FP": 0,  "FA": 0,   # False Positive / False Alarm
     "PC": -1,             # Planet Candidate (ambiguous, exclude from training)
+}
+
+# Kepler DR25 KOI dispositions, used to label the ~34k-TCE pre-training
+# corpus (see src/data/download_kepler.py). TCEs that never federated to a
+# KOI are Robovetter-rejected junk and get label 0. CANDIDATE rows are
+# excluded from training and exported as the unconfirmed-candidate
+# inference set.
+KEPLER_KOI_LABEL_MAP = {
+    "CONFIRMED": 1,
+    "FALSE POSITIVE": 0,
+    "CANDIDATE": -1,
 }
 
 # ============================================================

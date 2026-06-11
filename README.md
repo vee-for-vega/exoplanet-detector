@@ -145,8 +145,12 @@ The 2D CNN consistently outperforms the 1D CNN on PR-AUC (~0.81 vs ~0.75) and F1
 # Install dependencies
 pip install -r requirements.txt
 
-# Download TCE metadata from NASA
+# Download TESS TCE metadata from NASA
 python -m src.data.download
+
+# Download the Kepler DR25 pre-training corpus (32,673 labeled TCEs +
+# 1,359 unconfirmed candidates). Add --s3 to push the CSVs to the S3 bucket.
+python -m src.data.download_kepler
 
 # Train baselines on metadata features
 python train_baselines.py
@@ -164,9 +168,21 @@ python train_cnns.py
 
 ## Data Sources
 
-- **TCE metadata:** [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/) (TAP API)
-- **Light curves:** [MAST Archive](https://mast.stsci.edu/) via [Lightkurve](https://docs.lightkurve.org/)
-- **Mission:** [TESS (Transiting Exoplanet Survey Satellite)](https://tess.mit.edu/)
+- **TCE metadata:** [NASA Exoplanet Archive](https://exoplanetarchive.ipac.caltech.edu/) (TAP API) — TESS TOI table and Kepler Q1-Q17 DR25 TCE + KOI tables
+- **Light curves:** [MAST Archive](https://mast.stsci.edu/) via [Lightkurve](https://docs.lightkurve.org/); also mirrored in AWS at `s3://stpubdata` (us-east-1, requester-pays)
+- **Mission:** [TESS (Transiting Exoplanet Survey Satellite)](https://tess.mit.edu/) and [Kepler](https://science.nasa.gov/mission/kepler/)
+
+## Cloud Storage
+
+Pipeline artifacts (metadata CSVs, processed tensors, models, results) live in
+a private S3 bucket defined in `terraform/`. Raw light curves are never stored
+there — preprocessing streams them and keeps only the small tensors.
+
+```bash
+cd terraform && terraform init && terraform apply
+export EXOPLANET_S3_BUCKET=$(terraform output -raw bucket_name)
+python -m src.data.s3_sync push data/raw/kepler_tce_table_clean.csv metadata/
+```
 
 ## Tech Stack
 
