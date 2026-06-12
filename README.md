@@ -84,6 +84,39 @@ Results tested across two random seeds to verify stability. The training seed co
 
 The 2D CNN consistently outperforms the 1D CNN on PR-AUC (~0.81 vs ~0.75) and F1 (~0.75 vs ~0.72). Precision hovers around 70% across both models and seeds — roughly 3 in 10 "planet" predictions are false positives. This is the current ceiling with ~1,800 training samples; more data (Kepler pre-training) and ensembling the two models are the planned next steps to push past it.
 
+### Metadata Models v2 (tuned thresholds + gradient boosting)
+
+`train_metadata_models.py` upgrades the metadata-only stack: a gradient-boosted
+model joins the linear baselines, and every model's decision threshold is tuned
+for F1 on the validation set instead of defaulting to 0.5. Evaluated on
+held-out, star-grouped test sets:
+
+| Dataset | Model | Precision | Recall | F1 | PR-AUC |
+|---------|-------|-----------|--------|----|--------|
+| TESS (n=396) | Gradient Boost | 0.849 | 0.899 | 0.873 | 0.905 |
+| TESS (n=396) | Logistic Regression (tuned) | 0.672 | 0.870 | 0.758 | 0.785 |
+| Kepler (n=4,763) | Gradient Boost | 0.918 | 0.958 | 0.938 | 0.983 |
+| Kepler (n=4,763) | Logistic Regression (tuned) | 0.719 | 0.814 | 0.763 | 0.816 |
+
+Notes:
+- On TESS metadata alone, gradient boosting (PR-AUC 0.905) currently beats the
+  2D CNN on light curves (0.81) — making it the strongest model in the project
+  until the CNNs get the Kepler pre-training data.
+- The Kepler run includes Robovetter-style vetting diagnostics (odd/even depth,
+  centroid offsets, ghost stats, bootstrap FAP). Its 0.983 PR-AUC overstates
+  real-world performance on new candidates: the DR25 labels partly descend from
+  a vetting process that consumed these same diagnostics.
+- Naive Bayes collapses on the Kepler diagnostic features (PR-AUC 0.11) — a
+  textbook failure of the Gaussian/independence assumptions on skewed,
+  correlated vetting statistics. Kept as a cautionary baseline.
+
+### Kepler DR25 corpus
+
+`src/data/download_kepler.py` builds the pre-training corpus: 32,673 labeled
+TCEs (2,730 planets vs 29,943 false positives, 1:11) by joining the DR25 TCE
+table against DR25 KOI dispositions, plus 1,359 unconfirmed candidates exported
+separately as the future inference set.
+
 ### Key Design Decisions
 
 - **GroupShuffleSplit** — splits by star ID to prevent data leakage between train/val/test

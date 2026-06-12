@@ -76,6 +76,15 @@ COLUMN_MAP = {
     "tce_steff": "stellar_temp",            # Kelvin
     "tce_slogg": "stellar_logg",
     "tce_sradius": "stellar_radius",        # Solar radii
+    # Robovetter-style vetting diagnostics. These are the discriminators the
+    # DR25 pipeline itself computes to separate planets from false positives.
+    "tce_bin_oedp_stat": "odd_even_stat",   # odd vs even transit depth (EB tell)
+    "tce_dicco_msky": "centroid_offset_dic", # difference-image centroid offset, arcsec
+    "tce_dikco_msky": "centroid_offset_kic", # centroid offset vs KIC position, arcsec
+    "boot_fap": "boot_fap",                 # bootstrap false-alarm probability
+    "tce_cap_stat": "ghost_core_stat",      # ghost diagnostic, core aperture
+    "tce_hap_stat": "ghost_halo_stat",      # ghost diagnostic, halo aperture
+    "tce_max_sngle_ev": "max_single_event", # max single-event statistic
 }
 
 
